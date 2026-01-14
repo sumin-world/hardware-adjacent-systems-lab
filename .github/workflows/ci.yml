@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install -U pip
+          python -m pip install -r requirements.txt
+
+      - name: Compile check
+        run: |
+          python -m py_compile src/analyze_s2p.py src/mc_worst_case.py src/corner_eval.py src/doe_runner.py
+
+      - name: Generate sample s2p
+        run: |
+          python -c "import pathlib, skrf as rf; pathlib.Path('data/real').mkdir(parents=True, exist_ok=True); rf.data.ring_slot.write_touchstone('data/real/sample'); print('wrote sample.s2p')"
+
+      - name: Run scripts (smoke)
+        run: |
+          python src/analyze_s2p.py --s2p data/real/sample.s2p --out outputs/analyze_ci --fmin 75 --fmax 110
+          python src/mc_worst_case.py --s2p data/real/sample.s2p --out outputs/mc_ci --n 200 --seed 7 --fmin 75 --fmax 110
+          python src/corner_eval.py --s2p data/real/sample.s2p --out outputs/corner_ci --fmin 75 --fmax 110 --mc-report outputs/mc_ci/mc_report.json
+          python src/doe_runner.py --s2p data/real/sample.s2p --out outputs/doe_ci --n 32 --fmin 75 --fmax 110

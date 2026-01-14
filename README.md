@@ -1,6 +1,6 @@
 # Channel Analyzer (S-parameter + Statistical Worst-case)
 
-## What this proves (  Intern aligned)
+## What this proves (S-parameter + worst-case analysis)
 - Touchstone (.s2p) ingestion and S-parameter (S21/S11) metric extraction
 - Monte Carlo distribution of objective (e.g., S21_min) with percentiles/variance
 - Worst-case sample extraction + overlay visualization
@@ -28,9 +28,3 @@
 
 ### Baseline vs worst-case overlay
 ![worst_overlay](docs/img/worst_overlay.png)
-
-## Git
-    git status
-    git add .
-    git commit -m "Add S-parameter analyzer + MC worst-case + corner eval + DOE"
-    git push -u origin main

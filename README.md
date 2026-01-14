@@ -21,6 +21,14 @@
     python src/corner_eval.py --s2p data/real/sample.s2p --out outputs/corner1 --fmin 75 --fmax 110 --mc-report outputs/mc1/mc_report.json
     python src/doe_runner.py --s2p data/real/sample.s2p --out outputs/doe1 --n 500 --fmin 75 --fmax 110
 
+## Screenshots
+
+### Monte Carlo objective distribution
+![mc_hist](docs/img/mc_hist.png)
+
+### Baseline vs worst-case overlay
+![worst_overlay](docs/img/worst_overlay.png)
+
 ## Git
     git status
     git add .

@@ -107,7 +107,7 @@ def main():
 
     with (out_dir / "doe_results.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
-        w.writeher()
+        w.writeheader()
         w.writerows(rows)
 
     report = {

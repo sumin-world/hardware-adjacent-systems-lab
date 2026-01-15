@@ -104,7 +104,7 @@ def main():
     # write table
     with (out_dir / "corner_table.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=["corner", "a_loss_db", "b_slope_db", "refl_db", "objective_db"])
-        w.writeher()
+        w.writeheader()
         w.writerows(rows)
 
     report = {

@@ -1,4 +1,4 @@
-# Channel Analyzer (S-parameter + Statistical Worst-case)
+# CChannel Analysis Lab (S-parameter + Statistical Worst-case)
 
 ## What this proves (S-parameter + worst-case analysis)
 - Touchstone (.s2p) ingestion and S-parameter (S21/S11) metric extraction

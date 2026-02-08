@@ -1,35 +1,54 @@
-name: ci
+name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install -U pip
           python -m pip install -r requirements.txt
 
       - name: Compile check
         run: |
-          python -m py_compile src/analyze_s2p.py src/mc_worst_case.py src/corner_eval.py src/doe_runner.py
+          python -m py_compile src/common.py src/analyze_s2p.py src/mc_worst_case.py src/corner_eval.py src/doe_runner.py
 
-      - name: Generate sample s2p
+      - name: Generate sample data
         run: |
-          python -c "import pathlib, skrf as rf; pathlib.Path('data/real').mkdir(parents=True, exist_ok=True); rf.data.ring_slot.write_touchstone('data/real/sample'); print('wrote sample.s2p')"
+          python -c "import pathlib, skrf as rf; pathlib.Path('data/real').mkdir(parents=True, exist_ok=True); rf.data.ring_slot.write_touchstone('data/real/sample')"
 
-      - name: Run scripts (smoke)
+      - name: Smoke test — analyze
+        run: python src/analyze_s2p.py --s2p data/real/sample.s2p --out outputs/ci_analyze --fmin 75 --fmax 110
+
+      - name: Smoke test — Monte Carlo
+        run: python src/mc_worst_case.py --s2p data/real/sample.s2p --out outputs/ci_mc --n 200 --seed 7 --fmin 75 --fmax 110
+
+      - name: Smoke test — corner eval
+        run: python src/corner_eval.py --s2p data/real/sample.s2p --out outputs/ci_corner --fmin 75 --fmax 110 --mc-report outputs/ci_mc/mc_report.json
+
+      - name: Smoke test — DOE
+        run: python src/doe_runner.py --s2p data/real/sample.s2p --out outputs/ci_doe --n 32 --fmin 75 --fmax 110
+
+      - name: Validate outputs exist
         run: |
-          python src/analyze_s2p.py --s2p data/real/sample.s2p --out outputs/analyze_ci --fmin 75 --fmax 110
-          python src/mc_worst_case.py --s2p data/real/sample.s2p --out outputs/mc_ci --n 200 --seed 7 --fmin 75 --fmax 110
-          python src/corner_eval.py --s2p data/real/sample.s2p --out outputs/corner_ci --fmin 75 --fmax 110 --mc-report outputs/mc_ci/mc_report.json
-          python src/doe_runner.py --s2p data/real/sample.s2p --out outputs/doe_ci --n 32 --fmin 75 --fmax 110
+          test -f outputs/ci_analyze/metrics.json
+          test -f outputs/ci_mc/mc_report.json
+          test -f outputs/ci_corner/corner_report.json
+          test -f outputs/ci_doe/doe_results.csv
+          echo "✓ All expected outputs generated"

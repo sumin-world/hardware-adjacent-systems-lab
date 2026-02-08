@@ -4,6 +4,9 @@ __pycache__/
 outputs/
 .DS_Store
 data/real/
-
-# local rewrite artifacts
 .git-rewrite/
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
